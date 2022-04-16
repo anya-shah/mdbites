@@ -14,6 +14,7 @@ interface Props {
 export default function DetailScreen({ route, navigation }: Props) {
   const { social } = route.params;
 
+  // appbar
   const Bar = () => {
     return (
       <Appbar.Header>
@@ -23,6 +24,7 @@ export default function DetailScreen({ route, navigation }: Props) {
     );
   };
 
+  // details for social
   return (
     <>
       <Bar />
@@ -36,7 +38,10 @@ export default function DetailScreen({ route, navigation }: Props) {
             {social.eventLocation}
           </Text>
           <Text style={{ ...styles.subtitle, marginTop: 5, marginBottom: 20 }}>
-            {new Date(social.eventDate).toLocaleString()}
+            {new Date(social.eventDate).toLocaleString() + 
+            " • " + 
+            social.likes.length + 
+            (social.likes.length === 1 ? " like" : " likes")}
           </Text>
           <Text style={styles.body}>{social.eventDescription}</Text>
         </View>

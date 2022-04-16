@@ -19,6 +19,8 @@ import { SocialModel } from "../../../models/social";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../RootStackScreen";
 
+import { auth } from "../../../App";
+
 interface Props {
   navigation: StackNavigationProp<RootStackParamList, "NewSocialScreen">;
 }
@@ -133,6 +135,8 @@ export default function NewSocialScreen({ navigation }: Props) {
         eventLocation: eventLocation,
         eventDescription: eventDescription,
         eventImage: downloadURL,
+        likes: [],
+        creator: auth.currentUser!.uid,
       };
       console.log("setting download url");
       await setDoc(socialRef, socialDoc);
@@ -203,6 +207,7 @@ export default function NewSocialScreen({ navigation }: Props) {
           mode="datetime"
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
+          themeVariant="light"
         />
         <Snackbar
           duration={3000}

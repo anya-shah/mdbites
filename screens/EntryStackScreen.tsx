@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { AuthStackScreen } from "./AuthStack/AuthStackScreen";
 import { RootStackScreen } from "./RootStack/RootStackScreen";
-import firebase from "firebase";
+import firebase from "firebase/compat/app";
+import { onAuthStateChanged } from "firebase/auth";
+
+import "firebase/compat/auth";
+import "firebase/compat/firestore"
+import { auth } from "../App"
 
 /* Note: it is VERY important that you understand
     how this screen works!!! Read the logic on this screen
@@ -19,13 +24,11 @@ export function EntryStackScreen() {
   const [user, setUser] = useState<firebase.User | null>(null);
 
   useEffect(() => {
-    const unsubscribe = firebase
-      .auth()
-      .onAuthStateChanged((currentUser: any) => {
-        setUser(currentUser);
-        if (initializing) setInitializing(false);
-      });
-    return unsubscribe;
+    const unsubscribe = onAuthStateChanged(auth, (currentUser: any) => {
+      setUser(currentUser);
+      if (initializing) setInitializing(false);
+    });
+    return () => unsubscribe();
   }, [setUser]);
 
   if (initializing) {

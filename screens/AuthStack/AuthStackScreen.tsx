@@ -14,16 +14,19 @@ export function AuthStackScreen() {
   const options = { headerShown: false };
   return (
     <AuthStack.Navigator>
+      
       <AuthStack.Screen
         name="SignInScreen"
         options={options}
         component={SignInScreen}
       />
+
       <AuthStack.Screen
         name="SignUpScreen"
         options={options}
         component={SignUpScreen}
       />
+
     </AuthStack.Navigator>
   );
 }
