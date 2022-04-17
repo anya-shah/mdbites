@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, FlatList, Text, Share } from "react-native";
 import { Appbar, Button, Card, Snackbar } from "react-native-paper";
 import { getFirestore, collection, query, onSnapshot, orderBy, deleteDoc, doc, setDoc } from "firebase/firestore";
-import { SocialModel } from "../../../../models/social.js";
+import { PostModel } from "../../../../models/post.js";
 import { styles } from "./FeedScreen.styles";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../MainStackScreen.js";
@@ -26,7 +26,7 @@ interface Props {
 export default function FeedScreen({ navigation }: Props) {
 
   // state variables
-  const [socials, setSocials] = useState<SocialModel[]>([]);
+  const [posts, setPosts] = useState<PostModel[]>([]);
   const [visible, setVisible] = React.useState(false);
   const [message, setMessage] = useState("");
 
@@ -41,97 +41,90 @@ export default function FeedScreen({ navigation }: Props) {
     }
   }, [message]);
 
-  // user setup and get social collection
+  // user setup and get post collection
   const auth = getAuth();
   const currentUserId = auth.currentUser!.uid;
   const db = getFirestore();
-  const socialsCollection = collection(db, "socials");
+  const postsCollection = collection(db, "posts");
 
-  // set up a listener for the socials collection
+  // set up a listener for the posts collection
   useEffect(() => {
-    const unsubscribe = onSnapshot(query(socialsCollection, orderBy("eventDate", "asc")), (querySnapshot) => {
-      var newSocials: SocialModel[] = [];
-        querySnapshot.forEach((social: any) => {
-          const newSocial = social.data() as SocialModel;
-          newSocial.id = social.id;
-          newSocials.push(newSocial);
-        });
-        setSocials(newSocials);
+    const unsubscribe = onSnapshot(query(postsCollection, orderBy("date", "asc")), (querySnapshot) => {
+      var newPosts: PostModel[] = [];
+      
+      querySnapshot.forEach((post: any) => {
+        console.log(posts.length);
+        const newPost = post.data() as PostModel;
+        newPost.id = post.id;
+        newPosts.push(newPost);
+      });
+        setPosts(newPosts);
       });
     return unsubscribe;
   }, []);
 
-  // share a social
-  const onShare = async (social: SocialModel) => {
-    try {
-      const result = await Share.share({
-        message: 'Hey, hope to see you at '+social.eventName+'at ' + social.eventLocation+'!',
-      });
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+ 
 
-  // update a given social's likes in firestore
-  const updateSocialLikes = async (social: SocialModel) => {
-    await setDoc(doc(db, "socials", social.id!), {
-      id: social.id,
-      eventDate: social.eventDate,
-      eventDescription: social.eventDescription,
-      eventImage: social.eventImage,
-      eventLocation: social.eventLocation,
-      eventName: social.eventName,
-      likes: social.likes,
-      creator: social.creator,
+  // update a given post's likes in firestore
+  const updatePostLikes = async (post: PostModel) => {
+    await setDoc(doc(db, "posts", post.id!), {
+      id: post.id,
+      date: post.date,
+      comment: post.comment!,
+      restaurant: post.restaurant,
+      image: post.image,
+      rating: post.rating,
+      creator: post.creator,
+      likes: post.likes,
     });
   }
 
-  // determine if the user needs to be included or excluded from the social's likes
-  const toggleInterested = (social: SocialModel) => {
-    var newLikes = social.likes;
+  // determine if the user needs to be included or excluded from the post's likes
+  const toggleInterested = (post: PostModel) => {
+    var newLikes = post.likes;
     newLikes = newLikes.includes(currentUserId) ? 
     newLikes.filter((s) => s !== currentUserId) : newLikes.concat(currentUserId);
-    social.likes = newLikes;
-    updateSocialLikes(social);
+    post.likes = newLikes;
+    updatePostLikes(post);
   };
 
-  // delete a social from the firestore
-  const deleteSocial = async (social: SocialModel) => {
-    // TODO: Put your logic for deleting a social here,
+  // delete a post from the firestore
+  const deletePost = async (post: PostModel) => {
+    // TODO: Put your logic for deleting a post here,
     // and call this method from your "delete" button
-    // on each Social card that was created by this user.
-    // const document = doc(db, socials, social.id)
-    if (auth.currentUser!.uid === social.creator) {
-      await deleteDoc(doc(db, "socials", social.id));
+    // on each Post card that was created by this user.
+    // const document = doc(db, posts, posts.id)
+    if (auth.currentUser!.uid === post.creator) {
+      await deleteDoc(doc(db, "posts", post.id));
     } else {
-      console.log("User is not the social creator and cannot delete");
-      console.error("You can only delete your own socials!");
+      console.log("User is not the post creator and cannot delete");
+      console.error("You can only delete your own posts!");
     }
   };
 
-  // render a social
-  const renderSocial = ({ item }: { item: SocialModel }) => {
+  // render a post
+  const renderPost = ({ item }: { item: PostModel }) => {
     const onPress = () => {
       navigation.navigate("DetailScreen", {
-        social: item,
+        post: item,
       });
     };
 
     return (
       <Card onPress={onPress} style={{ margin: 16 }}>
 
-        <Card.Cover source={{ uri: item.eventImage }} />
+        <Card.Cover source={{ uri: item.image }} />
 
         <Card.Title
-          title={item.eventName}
-          subtitle={
-            item.eventLocation +
-            " • " +
-            new Date(item.eventDate).toLocaleString() + 
-            " • " +
-            item.likes.length + 
-            (item.likes.length === 1 ? " like" : " likes")
-          }
+          title={item.creator}
+          // subtitle={
+          //   item.eventLocation +
+          //   " • " +
+          //   new Date(item.eventDate).toLocaleString() + 
+          //   " • " +
+          //   item.likes.length + 
+          //   (item.likes.length === 1 ? " like" : " likes")
+          // }
         />
 
         {/* TODO: Add a like/interested button & delete social button. See Card.Actions
@@ -140,20 +133,20 @@ export default function FeedScreen({ navigation }: Props) {
 
         <Card.Actions>  
 
-          <Button icon={ item.likes.includes(currentUserId) ? 'heart' : 'heart-outline' } onPress={() => toggleInterested(item)}>
+          {/* <Button icon={ item.likes.includes(currentUserId) ? 'heart' : 'heart-outline' } onPress={() => toggleInterested(item)}>
             Like{ item.likes.includes(currentUserId) ? 'd' : '' }
-          </Button>
+          </Button> */}
 
           <Button 
             color="red" 
-            onPress={() => { deleteSocial(item) } } 
+            // onPress={() => { deleteSocial(item) } } 
             style={{ position: 'absolute', marginLeft: 100 }}
             icon='trash-can-outline'>
             Delete
           </Button>
 
           <Button 
-            onPress={()=> onShare(item)}
+            // onPress={()=> onShare(item)}
             icon={'export-variant'}
             style={{ position: 'absolute', marginLeft: 220 }}>
               Share
@@ -175,12 +168,12 @@ export default function FeedScreen({ navigation }: Props) {
           onPress={() => signOut(auth)}
         />
 
-        <Appbar.Content title="Socials" />
+        <Appbar.Content title="Posts" />
 
         <Appbar.Action
           icon="plus"
           onPress={() => {
-            navigation.navigate("NewSocialScreen");
+            navigation.navigate("NewPostScreen");
           }}
         />
 
@@ -200,8 +193,8 @@ export default function FeedScreen({ navigation }: Props) {
       <Bar />
       <View style={styles.container}>
         <FlatList
-          data={socials}
-          renderItem={renderSocial}
+          data={posts}
+          renderItem={renderPost}
           keyExtractor={(_: any, index: number) => "key-" + index}
           // TODO: Uncomment the following line, and figure out how it works
           // by reading the documentation :)

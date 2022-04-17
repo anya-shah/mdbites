@@ -5,7 +5,7 @@ import { Appbar, TextInput, Snackbar, Button } from "react-native-paper";
 import { AuthStackParamList } from "./AuthStackScreen";
 // import firebase from "firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../App";
+
 
 interface Props {
   navigation: StackNavigationProp<AuthStackParamList, "SignUpScreen">;
@@ -29,7 +29,6 @@ export default function SignUpScreen({ navigation }: Props) {
   // state variables
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [creatingAccount, setCreatingAccount] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const [message, setMessage] = useState("");
 
@@ -54,27 +53,7 @@ export default function SignUpScreen({ navigation }: Props) {
   };
   
   // create a user or error if invalid effort
-  useEffect(() => {
-    if (creatingAccount) {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          console.log('User account created & signed in!');
-        })
-        .catch(error => {
-          if (error.code === 'auth/email-already-in-use') {
-            console.log('That email address is already in use!');
-          }
-
-          if (error.code === 'auth/invalid-email') {
-            console.log('That email address is invalid!');
-            setMessage("Please use a valid email address.");
-          }
-        });
-      }
-      setCreatingAccount(false);
-      setMessage("");
   
-  }, [creatingAccount]);
 
   
   return (
@@ -102,7 +81,7 @@ export default function SignUpScreen({ navigation }: Props) {
         <Button 
           mode="contained"
           style={{ width: 350, alignSelf: "center" }}
-          onPress={ () => setCreatingAccount(true) }>
+          onPress={() => {navigation.navigate("ProfileSetupScreen")} }>
           <Text>Create An Account</Text>
         </Button>
 

@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, StackActions } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { AuthStackScreen } from "./AuthStack/AuthStackScreen";
@@ -9,6 +9,16 @@ import { onAuthStateChanged } from "firebase/auth";
 import "firebase/compat/auth";
 import "firebase/compat/firestore"
 import { auth } from "../App"
+
+
+import "react-native-gesture-handler";
+import { createStackNavigator } from "@react-navigation/stack";
+import { OpeningScreenMain } from "./Opening/OpeningScreenMain";
+
+const Stack = createStackNavigator();
+const StackOptions = { headerShown: false };
+
+
 
 /* Note: it is VERY important that you understand
     how this screen works!!! Read the logic on this screen
@@ -36,9 +46,22 @@ export function EntryStackScreen() {
   } else if (!user) {
     return (
       <NavigationContainer>
-        <AuthStackScreen />
+        <Stack.Navigator>
+          <Stack.Screen
+            options={StackOptions}  
+            name="Opening"  
+            component={OpeningScreenMain} />
+          <Stack.Screen 
+            options={StackOptions}
+            name="Auth" 
+            component={AuthStackScreen} />
+        </Stack.Navigator>
       </NavigationContainer>
     );
+    //     </Stack.Navigator>
+    //     <AuthStackScreen />
+    //   </NavigationContainer>
+    // );
   } else {
     return <RootStackScreen />;
   }

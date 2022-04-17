@@ -10,28 +10,30 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 // See https://docs.expo.io/versions/latest/sdk/imagepicker/
 // Most of the image picker code is directly sourced from the example
 import * as ImagePicker from "expo-image-picker";
-import { styles } from "./NewSocialScreen.styles";
+import { styles } from "./NewPostScreen.styles";
 
 import { getFirestore, doc, collection, setDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { getApp } from "firebase/app";
-import { SocialModel } from "../../../models/social";
+import { PostModel } from "../../../models/post";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../RootStackScreen";
 
 import { auth } from "../../../App";
 
 interface Props {
-  navigation: StackNavigationProp<RootStackParamList, "NewSocialScreen">;
+  navigation: StackNavigationProp<RootStackParamList, "NewPostScreen">;
 }
 
-export default function NewSocialScreen({ navigation }: Props) {
+export default function NewPostScreen({ navigation }: Props) {
   // Event details.
-  const [eventName, setEventName] = useState("");
-  const [eventDate, setEventDate] = useState<Date>();
-  const [eventLocation, setEventLocation] = useState("");
-  const [eventDescription, setEventDescription] = useState("");
-  const [eventImage, setEventImage] = useState<string | undefined>(undefined);
+
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [comment, setComment] = useState("");
+  const [restaurant, setRestaurant] = useState("");
+  const [rating, setRating] = useState(0);
+  const [date, setDate] = useState<Date>();
+
   // Date picker.
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -65,7 +67,7 @@ export default function NewSocialScreen({ navigation }: Props) {
     });
     console.log("done");
     if (!result.cancelled) {
-      setEventImage(result.uri);
+      setImage(result.uri);
     }
   };
 
@@ -82,7 +84,7 @@ export default function NewSocialScreen({ navigation }: Props) {
   // Code for DatePicker (from docs)
   const handleConfirm = (date: Date) => {
     date.setSeconds(0);
-    setEventDate(date);
+    setDate(date);
     hideDatePicker();
   };
 
@@ -95,19 +97,19 @@ export default function NewSocialScreen({ navigation }: Props) {
 
   // This method is called AFTER all fields have been validated.
   const saveEvent = async () => {
-    if (!eventName) {
-      showError("Please enter an event name.");
+    if (!restaurant) {
+      showError("Please enter a restaurant.");
       return;
-    } else if (!eventDate) {
+    } else if (!date) {
       showError("Please choose an event date.");
       return;
-    } else if (!eventLocation) {
-      showError("Please enter an event location.");
+    } else if (!rating) {
+      showError("Please enter a rating.");
       return;
-    } else if (!eventDescription) {
+    } else if (!comment) {
       showError("Please enter an event description.");
       return;
-    } else if (!eventImage) {
+    } else if (!image) {
       showError("Please choose an event image.");
       return;
     } else {
@@ -118,28 +120,28 @@ export default function NewSocialScreen({ navigation }: Props) {
       // Firestore wants a File Object, so we first convert the file path
       // saved in eventImage to a file object.
       console.log("getting file object");
-      const object: Blob = (await getFileObjectAsync(eventImage)) as Blob;
-      // Generate a brand new doc ID by calling .doc() on the socials node.
+      const object: Blob = (await getFileObjectAsync(image)) as Blob;
+      // Generate a brand new doc ID by calling .doc() on the posts node.
       const db = getFirestore();
-      const socialsCollection = collection(db, "socials");
-      const socialRef = doc(socialsCollection);
+      const postsCollection = collection(db, "posts");
+      const postRef = doc(postsCollection);
       console.log("putting file object");
       const storage = getStorage(getApp());
-      const storageRef = ref(storage, socialRef.id + ".jpg");
+      const storageRef = ref(storage, postRef.id + ".jpg");
       const result = await uploadBytes(storageRef, object);
       console.log("getting download url");
       const downloadURL = await getDownloadURL(result.ref);
-      const socialDoc: SocialModel = {
-        eventName: eventName,
-        eventDate: eventDate.getTime(),
-        eventLocation: eventLocation,
-        eventDescription: eventDescription,
-        eventImage: downloadURL,
-        likes: [],
+      const postDoc: PostModel = {
+        date: date.getTime(),
+        comment: comment!,
+        restaurant: restaurant,
+        image: image,
+        rating: rating,
         creator: auth.currentUser!.uid,
+        likes: [],
       };
       console.log("setting download url");
-      await setDoc(socialRef, socialDoc);
+      await setDoc(postRef, postDoc);
       setLoading(false);
       navigation.goBack();
     } catch (error: any) {
@@ -152,7 +154,7 @@ export default function NewSocialScreen({ navigation }: Props) {
     return (
       <Appbar.Header>
         <Appbar.Action onPress={navigation.goBack} icon="close" />
-        <Appbar.Content title="Socials" />
+        <Appbar.Content title="new post" />
       </Appbar.Header>
     );
   };
@@ -162,24 +164,24 @@ export default function NewSocialScreen({ navigation }: Props) {
       <Bar />
       <View style={{ ...styles.container, padding: 20 }}>
         <TextInput
-          label="Event Name"
-          value={eventName}
-          onChangeText={(name) => setEventName(name)}
+          label="Restaurant Name"
+          value={restaurant}
+          onChangeText={(location) => setRestaurant(location)}
           style={{ backgroundColor: "white", marginBottom: 10 }}
           autoComplete={false}
         />
         <TextInput
-          label="Event Location"
-          value={eventLocation}
-          onChangeText={(location) => setEventLocation(location)}
+          label="Rating (1-5)"
+          value={rating}
+          onChangeText={(rate) => setRating(rate)}
           style={{ backgroundColor: "white", marginBottom: 10 }}
           autoComplete={false}
         />
         <TextInput
-          label="Event Description"
-          value={eventDescription}
+          label="Comment"
+          value={comment}
           multiline={true}
-          onChangeText={(desc) => setEventDescription(desc)}
+          onChangeText={(desc) => setComment(desc)}
           style={{ backgroundColor: "white", marginBottom: 10 }}
           autoComplete={false}
         />
@@ -188,11 +190,11 @@ export default function NewSocialScreen({ navigation }: Props) {
           onPress={showDatePicker}
           style={{ marginTop: 20 }}
         >
-          {eventDate ? eventDate.toLocaleString() : "Choose a Date"}
+          {date ? date.toLocaleString() : "When did you go?"}
         </Button>
 
         <Button mode="outlined" onPress={pickImage} style={{ marginTop: 20 }}>
-          {eventImage ? "Change Image" : "Pick an Image"}
+          {image ? "Change Image" : "Pick an Image"}
         </Button>
         <Button
           mode="contained"
