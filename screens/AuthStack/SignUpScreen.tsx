@@ -81,7 +81,7 @@ export default function SignUpScreen({ navigation }: Props) {
         <Button 
           mode="contained"
           style={{ width: 350, alignSelf: "center" }}
-          onPress={() => {navigation.navigate("ProfileSetupScreen")} }>
+          onPress={() => navigation.navigate("ProfileSetupScreen", {username: email, password: password} ) }>
           <Text>Create An Account</Text>
         </Button>
 

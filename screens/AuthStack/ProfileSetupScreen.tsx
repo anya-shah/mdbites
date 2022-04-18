@@ -13,8 +13,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 
 
-
-
 const Bar = () => {
     return (
         <Appbar.Header style={{ backgroundColor: "#79DFFF" }}>
@@ -24,7 +22,8 @@ const Bar = () => {
 };
 
 export default function ProfileSetupScreen(props) {
-    const {navigation} = props;
+    // const {username, password} = route.params;
+    const { navigation } = props;
     const [priceRange, setPriceRange] = useState(0);
     const [nickName, setnickName] = useState("");
     const [distance, setDistance] = useState(0);
@@ -34,23 +33,23 @@ export default function ProfileSetupScreen(props) {
 
 
     useEffect(() => {
-        // if (creatingAccount) {
-        //   createUserWithEmailAndPassword(auth, email, password)
-        //     .then(() => {
-        //       console.log('User account created & signed in!');
-        //     })
-        //     .catch(error => {
-        //       if (error.code === 'auth/email-already-in-use') {
-        //         console.log('That email address is already in use!');
-        //       }
+        if (creatingAccount) {
+          createUserWithEmailAndPassword(auth, "3@username.com", "password")
+            .then(() => {
+              console.log('User account created & signed in!');
+            })
+            .catch(error => {
+              if (error.code === 'auth/email-already-in-use') {
+                console.log('That email address is already in use!');
+              }
     
-        //       if (error.code === 'auth/invalid-email') {
-        //         console.log('That email address is invalid!');
-        //         // setMessage("Please use a valid email address.");
-        //       }
-        //     });
-        //   }
-        //   setCreatingAccount(false);
+              if (error.code === 'auth/invalid-email') {
+                console.log('That email address is invalid!');
+                // setMessage("Please use a valid email address.");
+              }
+            });
+          }
+          setCreatingAccount(false);
         //   setMessage("");
       
       }, [creatingAccount]);
@@ -116,7 +115,7 @@ export default function ProfileSetupScreen(props) {
                                 maximumValue={100}
                                 minimumTrackTintColor="#79DFFF"
                                 maximumTrackTintColor="#000000"
-                                value={setDistance}
+                                value={distance}
                                 onValueChange={(value) => setDistance(Math.round(value))}
                             />
                             <View >
@@ -132,6 +131,8 @@ export default function ProfileSetupScreen(props) {
                                 label="Nickname"
                                 value={nickName}
                                 onChangeText={nickName => setnickName(nickName)}
+                                autoComplete={false}
+                                secureTextEntry={true}
                             />
                         </View>
 
@@ -161,8 +162,8 @@ export default function ProfileSetupScreen(props) {
 
                         <Button
                             mode="contained"
-                            onPress={() => setCreatingAccount(true).then(()=>navigation.navigate("ProfileSetupScreen")) }>
-                            style={{ marginTop: 10 }}
+                            onPress={() => setCreatingAccount(true) }
+                            style={{ marginTop: 10, marginBottom: 100 }}
                             loading={loading}
                         >
                             Submit
