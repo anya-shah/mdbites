@@ -1,10 +1,11 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
-import { Text, SafeAreaView, StyleSheet, ScrollView } from "react-native";
+import { Text, SafeAreaView, StyleSheet, ScrollView, View } from "react-native";
 import { Appbar, TextInput, Snackbar, Button } from "react-native-paper";
 import { AuthStackParamList } from "./AuthStackScreen";
 // import firebase from "firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { AppStyles } from "../../AppStyles";
 
 
 interface Props {
@@ -40,19 +41,31 @@ export default function SignUpScreen({ navigation }: Props) {
   useEffect(() => {
     if (message !== "") {
       onToggleSnackBar();
+      console.log('heyldsak');
     }
   }, [message]);
 
   // appbar
   const Bar = () => {
     return (
-      <Appbar.Header >
-        <Appbar.Content title="Create an Account" />
+      <Appbar.Header style={{alignSelf: 'center', backgroundColor: "#79DFFF"}}>
+        <View style={AppStyles.openingText}>
+            <Text style={AppStyles.openingMD}>md</Text>
+            <Text style={AppStyles.openingBites}>bites</Text>   
+        </View>
       </Appbar.Header>
     );
   };
   
-  // create a user or error if invalid effort
+  // move to setup or error if invalid effort
+  const verify = () => {
+    if (email === '') {
+      setMessage('Please enter an email address!');
+      console.log(dsajfil);
+    } else {
+      navigation.navigate("ProfileSetupScreen", {username: email, password: password});
+    }
+  }
   
 
   
@@ -61,34 +74,48 @@ export default function SignUpScreen({ navigation }: Props) {
       <Bar />
       <SafeAreaView style={styles.container}>
         <TextInput
-          label="Email"
+          label="email address"
           value={email}
           onChangeText={(input) => setEmail(input)}
-          style={{ backgroundColor: "white", marginBottom: 10, marginTop: 20, marginLeft: 15, marginRight: 15 }}
+          style={styles.input}
+          // style={{ backgroundColor: "white", marginBottom: 10, marginTop: 20, marginLeft: 15, marginRight: 15 }}
           autoComplete={false}
           mode="flat"
+          underlineColor='black'
+          selectionColor='black'
+          activeUnderlineColor='black'
+          placeholderTextColor='black'
         />
 
         <TextInput
-          label="Password"
+          label="password"
           value={password}
           onChangeText={(input) => setPassword(input)}
-          style={{ backgroundColor: "white", marginBottom: 30, marginLeft: 15, marginRight: 15 }}
+          style={styles.input}
+          // style={{ backgroundColor: "white", marginBottom: 30, marginLeft: 15, marginRight: 15 }}
           autoComplete={false}
           secureTextEntry={true}
+          underlineColor='black'
+          selectionColor='black'
+          activeUnderlineColor='black'
+          placeholderTextColor='black'
         />
 
         <Button 
           mode="contained"
-          style={{ width: 350, alignSelf: "center" }}
-          onPress={() => navigation.navigate("ProfileSetupScreen", {username: email, password: password} ) }>
-          <Text>Create An Account</Text>
+          style={styles.createAccountButton}
+          // style={{ width: 350, alignSelf: "center" }}
+          onPress={() => verify() }>next
+       
+          {/* <Text>Set up profile</Text> */}
         </Button>
 
         <Button 
           onPress={() => {navigation.navigate("SignInScreen")}}
           style={styles.button}>
-          <Text>Or, sign in instead</Text>
+          <Text style={{color: 'black'}}>
+            Or, sign in instead
+          </Text>
         </Button>
 
         <Snackbar
@@ -108,12 +135,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 32,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#79DFFF",
   },
-  button: {
-    marginTop: 20,
+  createAccountButton: {
+    width: '90%', 
+    alignSelf: "center",
+    backgroundColor: 'black',
+    borderRadius: 30,
+    marginTop: '15%',
+    marginBottom: '30%',
   }, 
   snackbar: {
     marginBottom: 50
-  }
+  },
+  button: {
+    marginTop: '10%'
+  },
+  input: {
+    marginTop: 50,
+    marginHorizontal: 15,
+    backgroundColor: "#79DFFF",
+    width: '80%',
+    alignSelf: 'center',
+  },
 });

@@ -1,11 +1,12 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, Text } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { Appbar, TextInput, Snackbar, Button } from "react-native-paper";
 import { AuthStackParamList } from "./AuthStackScreen";
 // import firebase from "firebase";
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../App";
+import { AppStyles } from "../../AppStyles"
 
 interface Props {
   navigation: StackNavigationProp<AuthStackParamList, "SignInScreen">;
@@ -49,11 +50,16 @@ export default function SignInScreen({ navigation }: Props) {
   // appbar
   const Bar = () => {
     return (
-      <Appbar.Header >
-        <Appbar.Content title="Sign In" />
+      <Appbar.Header style={{alignSelf: 'center', backgroundColor: "#79DFFF"}}>
+        <View style={AppStyles.openingText}>
+            <Text style={AppStyles.openingMD}>md</Text>
+            <Text style={AppStyles.openingBites}>bites</Text>   
+        </View>
       </Appbar.Header>
     );
   };
+
+  
 
   // sign in a user or error if they don't exist
   useEffect(() => {
@@ -93,24 +99,32 @@ export default function SignInScreen({ navigation }: Props) {
       <SafeAreaView style={styles.container}>
 
         <TextInput
-          label="Email"
+          label="email address"
           value={email}
           onChangeText={(input) => setEmail(input)}
           style={styles.input}
           autoComplete={false}
           mode="flat"
+          underlineColor='black'
+          selectionColor='black'
+          activeUnderlineColor='black'
+          placeholderTextColor='black'
         />
 
         <TextInput
-          label="Password"
+          label="password"
           value={password}
           onChangeText={(input) => setPassword(input)}
           style={styles.input}
           autoComplete={false}
           secureTextEntry={true}
+          underlineColor='black'
+          selectionColor='black'
+          activeUnderlineColor='black'
+          placeholderTextColor='black'
         />
 
-        <Button 
+        <Button
           mode="contained"
           style={styles.signInButton}
           onPress={() => {setSigningIn(true)}}>
@@ -120,15 +134,18 @@ export default function SignInScreen({ navigation }: Props) {
         <Button 
           onPress={() => {navigation.navigate("SignUpScreen")}}
           style={styles.button}>
-          <Text>Create an account</Text>
+          <Text style={{color: 'black'}}>
+            Create an account
+          </Text>
         </Button>
 
         <Button 
           style={styles.button}
           color={"grey"}
           onPress={() => setResettingPassword(true)}>
-          <Text>Reset Password</Text>
-
+          <Text style={{color: 'black'}}>
+            Reset Password
+          </Text>
         </Button>
 
         <Snackbar
@@ -148,22 +165,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 32,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#79DFFF",
   },
   input: {
-    marginTop: 10,
-    marginLeft: 15,
-    marginRight: 15,
-    backgroundColor: "white",
+    marginTop: 50,
+    marginHorizontal: 15,
+    backgroundColor: "#79DFFF",
+    width: '80%',
+    alignSelf: 'center',
   },
   signInButton: {
-    marginTop: 30,
-    marginBottom: 20,
-    width: 350, 
-    alignSelf: "center"
+    width: '90%', 
+    alignSelf: "center",
+    backgroundColor: 'black',
+    borderRadius: 30,
+    marginTop: '15%',
+    marginBottom: '30%'
   },
   button: {
-    marginTop: 10,
+    marginTop: '10%'
   },
   snackbar: {
     marginBottom: 50

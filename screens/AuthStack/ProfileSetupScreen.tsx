@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Appbar, Button, Provider as PaperProvider, TextInput } from 'react-native-paper';
+import { Appbar, Button, Provider as PaperProvider, Snackbar, TextInput } from 'react-native-paper';
 import ButtonBlack from '../../ButtonBlack';
 import Slider from '@react-native-community/slider';
 import React, { useState, useEffect } from 'react';
@@ -16,14 +16,16 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 const Bar = () => {
     return (
         <Appbar.Header style={{ backgroundColor: "#79DFFF" }}>
-            <Appbar.Content title="Socials" />
+            <Appbar.Content title="Let's set up your profile!" />
         </Appbar.Header>
     );
 };
 
-export default function ProfileSetupScreen(props) {
-    // const {username, password} = route.params;
+export default function ProfileSetupScreen(props: { route?: any; navigation?: any; }) {
+    const {route} = props;
+    const {email, password} = route.params;
     const { navigation } = props;
+
     const [priceRange, setPriceRange] = useState(0);
     const [nickName, setnickName] = useState("");
     const [distance, setDistance] = useState(0);
@@ -31,10 +33,24 @@ export default function ProfileSetupScreen(props) {
     const [loading, setLoading] = useState(false);
     const [creatingAccount, setCreatingAccount] = useState(false);
 
+    const [visible, setVisible] = React.useState(false);
+    const [message, setMessage] = useState("");
+
+    // snackbar toggles
+    const onToggleSnackBar = () => setVisible(!visible);
+    const onDismissSnackBar = () => setVisible(false);
+
+    // poke snackbar using message
+    useEffect(() => {
+        if (message !== "") {
+        onToggleSnackBar();
+        }
+    }, [message]);
+
 
     useEffect(() => {
         if (creatingAccount) {
-          createUserWithEmailAndPassword(auth, "3@username.com", "password")
+          createUserWithEmailAndPassword(auth, email, password)
             .then(() => {
               console.log('User account created & signed in!');
             })
@@ -45,12 +61,15 @@ export default function ProfileSetupScreen(props) {
     
               if (error.code === 'auth/invalid-email') {
                 console.log('That email address is invalid!');
-                // setMessage("Please use a valid email address.");
+                setMessage("Please use a valid email address.");
+              } else {
+                  console.log('Please fill out all fields!');
+                  setMessage('hey');
               }
             });
           }
           setCreatingAccount(false);
-        //   setMessage("");
+          setMessage("");
       
       }, [creatingAccount]);
       
@@ -69,91 +88,110 @@ export default function ProfileSetupScreen(props) {
     };
     return (
         <PaperProvider>
+            <Bar />
             <SafeAreaView>
-                <Bar />
                 <ScrollView>
                     <View style={styles.container}>
-                        <Text style={{ fontSize: 20, marginBottom: 30 }}>Let's set up your profile</Text>
-                        <ButtonBlack text="① What kind of food do you like" />
-                        <View style={{
-                            backgroundColor: "white",
-                            marginHorizontal: 20, width: 300, height: 300, marginTop: 20, marginBottom: 20
-                        }}>
 
-                            <ScrollView >
-                                <View style={styles.containerRestaurant}>
-                                    {restaurantData.map((restaurant, index) => (
-                                        <RestaurantCard key={index} name={restaurant.name} image={restaurant.image} />
-                                    ))}
-                                </View>
-                            </ScrollView>
-                        </View>
-
-
-                        <View style={{ marginBottom: 20 }}>
-                            <ButtonBlack text="② What's your usual price range?" />
-                            <Slider
-                                style={{ width: 300, height: 40 }}
-                                minimumValue={0}
-                                maximumValue={100}
-                                minimumTrackTintColor="#79DFFF"
-                                maximumTrackTintColor="#000000"
-                                value={priceRange}
-                                onValueChange={(value) => setPriceRange(Math.round(value))}
-                            />
-                            <View >
-                                <Text style={{ alignContent: "center" }}>Price: {priceRange}</Text>
+                        {/* STEP 1: CUISINE SCROLLVIEW */}
+                        <View style={{marginVertical: 20}}>
+                            <View style={{alignSelf: 'center'}} >
+                                <ButtonBlack text="1: What kind of food do you like?"/>
                             </View>
-                            <Text>$0                                                                   $100</Text>
-                        </View>
-
-                        <View style={{ marginBottom: 20 }}>
-                            <ButtonBlack text="③ How far do you usually go?" />
-                            <Slider
-                                style={{ width: 300, height: 40 }}
-                                minimumValue={0}
-                                maximumValue={100}
-                                minimumTrackTintColor="#79DFFF"
-                                maximumTrackTintColor="#000000"
-                                value={distance}
-                                onValueChange={(value) => setDistance(Math.round(value))}
-                            />
-                            <View >
-                                <Text style={{ alignContent: "center" }}>Distance: {distance}</Text>
+                            <View style={styles.scrollView}>
+                                <ScrollView directionalLockEnabled={true}>
+                                    <View style={styles.containerRestaurant}>
+                                        {restaurantData.map((restaurant, index) => (
+                                            <RestaurantCard key={index} name={restaurant.name} image={restaurant.image} />
+                                        ))}
+                                    </View>
+                                </ScrollView>
                             </View>
-                            <Text>0 miles                                                                   100 miles</Text>
                         </View>
 
-                        <View>
-                            <ButtonBlack text="④ What do your friends call you?" />
-                            <TextInput
-                                style={{ width: 300, height: 40, marginBottom: 20, marginTop: 10, marginLeft: 15 }}
-                                label="Nickname"
-                                value={nickName}
-                                onChangeText={nickName => setnickName(nickName)}
-                                autoComplete={false}
-                                secureTextEntry={true}
-                            />
+                        {/* STEP 2: SPENDING SLIDER */}
+                        <View style={{marginVertical: 20}}>
+                            <View style={{alignSelf: 'center'}}>
+                                <ButtonBlack text="2: How much do you usually spend?" width='100%'/>
+                            </View>
+                            <Text style={{ marginTop: 10, alignSelf: "center" }}>${priceRange}</Text>
+                            <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
+                                <Text style={{marginLeft: 15}}>$0  </Text>
+                                <Slider
+                                    style={{width: '70%'}}
+                                    minimumValue={0}
+                                    maximumValue={100}
+                                    minimumTrackTintColor="white"
+                                    maximumTrackTintColor="black"
+                                    value={priceRange}
+                                    onValueChange={(value) => setPriceRange(Math.round(value))}
+                                />
+                                <Text style={{marginRight: 15}}>$100</Text>
+                            </View>
                         </View>
 
-                        <View style={{ marginBottom: 20 }}>
-                            <ButtonBlack text="⑤ Add profile picture?" />
-                            <Button mode="outlined" onPress={pickImage} style={{ marginTop: 20 }}>
+                        {/* STEP 3: DISTANCE SLIDER */}
+                        <View style={{ marginVertical: 20 }}>
+                            <View style={{alignSelf: 'center'}}>
+                                <ButtonBlack text="3: How far do you usually go?"/>
+                            </View>
+                            <Text style={{ marginTop: 10, alignSelf: "center" }}>{distance} miles</Text>
+                            <View style={{flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
+                                <Text style={{marginLeft: 15}}>0 mi  </Text>
+                                <Slider
+                                    style={{ width: '70%' }}
+                                    minimumValue={0}
+                                    maximumValue={100}
+                                    minimumTrackTintColor="white"
+                                    maximumTrackTintColor="black"
+                                    value={distance}
+                                    onValueChange={(value) => setDistance(Math.round(value))}
+                                />
+                                <Text style={{marginRight: 15}}>100 mi</Text>
+                            </View>
+                        </View>
+
+                        {/* STEP 4: NICKNAME ENTRY */}
+                        <View style={{marginVertical: 20, alignItems: 'center', width: '100%'}}>
+                            <View style={{alignSelf: 'center'}}>
+                                <ButtonBlack text="4: What do your friends call you?" />
+                            </View>
+                            <View style={{width: 325, marginVertical: 10}}>
+                                <TextInput
+                                    style={styles.input}
+                                    label="name"
+                                    value={nickName}
+                                    onChangeText={nickName => setnickName(nickName)}
+                                    autoComplete={false}
+                                    secureTextEntry={false}
+                                    underlineColor='black'
+                                    selectionColor='black'
+                                    activeUnderlineColor='black'
+                                    placeholderTextColor='black'
+                                />
+                            </View>
+                        </View>
+
+                        {/* STEP 5: IMAGE PICKER */}
+                        <View style={{ marginVertical: 20 }}>
+                            <ButtonBlack text="5: (Optional) Add a profile picture" />
+                            <Button 
+                                mode="outlined" 
+                                onPress={pickImage} 
+                                style={{ marginTop: 20, backgroundColor: 'white', borderRadius: 50, width: '50%', alignSelf: 'center' }} 
+                                color='black'>
                                 {eventImage ? "Change Image" : "Pick an Image"}
                             </Button>
                         </View>
 
-                        <View style={{ marginBottom: 20 }}>
-                            <ButtonBlack text="⑥Add your friends" />
-                            <View style={{
-                                backgroundColor: "white",
-                                marginHorizontal: 20, width: 300, height: 300, marginTop: 20, marginBottom: 20
-                            }}>
-
+                        {/* STEP 6: ADD FRIENDS SCROLLVIEW */}
+                        <View style={{ marginVertical: 20 }}>
+                            <ButtonBlack text="6: (optional) Add your friends" />
+                            <View style={ styles.scrollView }>
                                 <ScrollView >
                                     <View style={styles.containerRestaurant}>
                                         {usersData.map((user, index) => (
-                                            <RestaurantCard key={index} name={user.name} image={user.image} />
+                                            <RestaurantCard key={index} name={user.name} image={user.image}/>
                                         ))}
                                     </View>
                                 </ScrollView>
@@ -163,7 +201,7 @@ export default function ProfileSetupScreen(props) {
                         <Button
                             mode="contained"
                             onPress={() => setCreatingAccount(true) }
-                            style={{ marginTop: 10, marginBottom: 100 }}
+                            style={styles.submitButton}
                             loading={loading}
                         >
                             Submit
@@ -171,6 +209,13 @@ export default function ProfileSetupScreen(props) {
 
                     </View>
                 </ScrollView>
+                <Snackbar
+                    visible={visible}
+                    onDismiss={onDismissSnackBar}
+                    style={ styles.snackbar }
+                    >
+                    {message}
+                </Snackbar>
             </SafeAreaView>
         </PaperProvider>
     );
@@ -179,21 +224,22 @@ export default function ProfileSetupScreen(props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#79DFFF',
         alignItems: 'center',
         justifyContent: 'center',
-
     },
     containerRestaurant: {
-        backgroundColor: "#7CA1B4",
+        backgroundColor: "black",
         flex: 1,
         flexDirection: 'row',
         flexWrap: "wrap",
         justifyContent: "space-evenly",
         borderRadius: 30,
+        width: '95%',
+        alignSelf: 'center',
     },
     square: {
-        backgroundColor: "#7cb48f",
+        backgroundColor: "#79DFFF",
         width: 100,
         height: 100,
         margin: 25,
@@ -201,30 +247,54 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
     },
+    input: {
+        height: 50,
+        marginHorizontal: 15,
+        backgroundColor: "#79DFFF",
+        width: '80%',
+        alignSelf: 'center',
+    },
+    scrollView: {
+        marginHorizontal: 20, 
+        width: '85%', 
+        height: 300, 
+        marginTop: 20
+    },
+    submitButton: {
+        width: '90%', 
+        alignSelf: "center",
+        backgroundColor: 'black',
+        borderRadius: 30,
+        marginTop: '15%',
+        marginBottom: '50%',
+    },
+    snackbar: {
+        marginBottom: 50
+    },
 });
 const restaurantData = [
     {
-        name: 'Restaurant 1',
+        name: 'Cuisine 1',
         image: 'https://www.tastingtable.com/img/gallery/20-japanese-dishes-you-need-to-try-at-least-once/l-intro-1644007893.jpg',
     },
     {
-        name: 'Restaurant 2',
+        name: 'Cuisine 2',
         image: 'https://www.tastingtable.com/img/gallery/20-japanese-dishes-you-need-to-try-at-least-once/l-intro-1644007893.jpg',
     },
     {
-        name: 'Restaurant 3',
+        name: 'Cuisine 3',
         image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
     },
     {
-        name: 'Restaurant 4',
+        name: 'Cuisine 4',
         image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
     },
     {
-        name: 'Restaurant 5',
+        name: 'Cuisine 5',
         image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
     },
     {
-        name: 'Restaurant 6',
+        name: 'Cuisine 6',
         image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
     },
 ]
