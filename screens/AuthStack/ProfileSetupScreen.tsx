@@ -21,10 +21,10 @@ const Bar = () => {
     );
 };
 
-export default function ProfileSetupScreen(props: { route?: any; navigation?: any; }) {
-    const {route} = props;
+export default function ProfileSetupScreen(props: { navigation?: any; route?: any; }) {
+    const {navigation, route} = props;
     const {email, password} = route.params;
-    const { navigation } = props;
+    // const { navigation } = props;
 
     const [priceRange, setPriceRange] = useState(0);
     const [nickName, setnickName] = useState("");
@@ -56,20 +56,20 @@ export default function ProfileSetupScreen(props: { route?: any; navigation?: an
             })
             .catch(error => {
               if (error.code === 'auth/email-already-in-use') {
-                console.log('That email address is already in use!');
+                console.error('That email address is already in use!');
+                setMessage('DJSAKFJ;!');
               }
     
               if (error.code === 'auth/invalid-email') {
                 console.log('That email address is invalid!');
                 setMessage("Please use a valid email address.");
               } else {
-                  console.log('Please fill out all fields!');
-                  setMessage('hey');
+                setMessage('hey');
               }
             });
           }
           setCreatingAccount(false);
-          setMessage("");
+        //   setMessage("");
       
       }, [creatingAccount]);
       

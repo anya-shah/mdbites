@@ -61,9 +61,8 @@ export default function SignUpScreen({ navigation }: Props) {
   const verify = () => {
     if (email === '') {
       setMessage('Please enter an email address!');
-      console.log(dsajfil);
     } else {
-      navigation.navigate("ProfileSetupScreen", {username: email, password: password});
+      navigation.navigate("ProfileSetupScreen", {email: email, password: password});
     }
   }
   
