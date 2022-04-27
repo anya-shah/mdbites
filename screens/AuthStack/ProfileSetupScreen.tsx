@@ -8,18 +8,11 @@ import RestaurantCard from '../../RestaurantCard';
 import * as ImagePicker from "expo-image-picker";
 import { auth } from "../../App";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { AppStyles } from '../../AppStyles';
 
 // Code for ImagePicker (from docs)
 
 
-
-const Bar = () => {
-    return (
-        <Appbar.Header style={{ backgroundColor: "#79DFFF" }}>
-            <Appbar.Content title="Let's set up your profile!" />
-        </Appbar.Header>
-    );
-};
 
 export default function ProfileSetupScreen(props: { navigation?: any; route?: any; }) {
     const {navigation, route} = props;
@@ -39,6 +32,23 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
     // snackbar toggles
     const onToggleSnackBar = () => setVisible(!visible);
     const onDismissSnackBar = () => setVisible(false);
+
+    // appbar
+    const Bar = () => {
+        return (
+        <Appbar.Header style={{alignSelf: 'flex-start', backgroundColor: "#79DFFF"}}>
+            <Appbar.Action
+            icon="arrow-left"
+            onPress={() => navigation.goBack()}
+            style={{marginRight: 40}}
+            />
+            <View style={{flexDirection: 'row', position: 'absolute', marginHorizontal: '35%'}}>
+                <Text style={AppStyles.openingMD}>md</Text>
+                <Text style={AppStyles.openingBites}>bites</Text>
+            </View>
+        </Appbar.Header>
+        );
+    };
 
     // poke snackbar using message
     useEffect(() => {
@@ -94,7 +104,7 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
                     <View style={styles.container}>
 
                         {/* STEP 1: CUISINE SCROLLVIEW */}
-                        <View style={{marginVertical: 20}}>
+                        <View style={{marginVertical: 30}}>
                             <View style={{alignSelf: 'center'}} >
                                 <ButtonBlack text="1: What kind of food do you like?"/>
                             </View>
@@ -110,7 +120,7 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
                         </View>
 
                         {/* STEP 2: SPENDING SLIDER */}
-                        <View style={{marginVertical: 20}}>
+                        <View style={{marginVertical: 30}}>
                             <View style={{alignSelf: 'center'}}>
                                 <ButtonBlack text="2: How much do you usually spend?" width='100%'/>
                             </View>
@@ -131,7 +141,7 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
                         </View>
 
                         {/* STEP 3: DISTANCE SLIDER */}
-                        <View style={{ marginVertical: 20 }}>
+                        <View style={{ marginVertical: 30 }}>
                             <View style={{alignSelf: 'center'}}>
                                 <ButtonBlack text="3: How far do you usually go?"/>
                             </View>
@@ -152,7 +162,7 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
                         </View>
 
                         {/* STEP 4: NICKNAME ENTRY */}
-                        <View style={{marginVertical: 20, alignItems: 'center', width: '100%'}}>
+                        <View style={{marginVertical: 30, alignItems: 'center', width: '100%'}}>
                             <View style={{alignSelf: 'center'}}>
                                 <ButtonBlack text="4: What do your friends call you?" />
                             </View>
@@ -173,7 +183,7 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
                         </View>
 
                         {/* STEP 5: IMAGE PICKER */}
-                        <View style={{ marginVertical: 20 }}>
+                        <View style={{ marginVertical: 30 }}>
                             <ButtonBlack text="5: (Optional) Add a profile picture" />
                             <Button 
                                 mode="outlined" 
@@ -185,7 +195,7 @@ export default function ProfileSetupScreen(props: { navigation?: any; route?: an
                         </View>
 
                         {/* STEP 6: ADD FRIENDS SCROLLVIEW */}
-                        <View style={{ marginVertical: 20 }}>
+                        <View style={{ marginVertical: 30 }}>
                             <ButtonBlack text="6: (optional) Add your friends" />
                             <View style={ styles.scrollView }>
                                 <ScrollView >

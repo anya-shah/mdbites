@@ -5,7 +5,7 @@ import React, {Component} from "react";
 import App from "../../App";
 import { AppStyles } from "../../AppStyles";
 
-export const OpeningScreenMain = (props) => {
+export const OpeningScreenMain = (props: { navigation: any; }) => {
     const { navigation } = props;
 
     return (
